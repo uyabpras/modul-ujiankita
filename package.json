@@ -1,0 +1,31 @@
+{
+  "name": "modul_service",
+  "version": "1.0.0",
+  "description": "modul service is collection of several soal",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/tikumin/ujian-kita-modul-service.git"
+  },
+  "keywords": [
+    "ujian-kita",
+    "modul-service"
+  ],
+  "author": "tikumin",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/tikumin/ujian-kita-modul-service/issues"
+  },
+  "homepage": "https://github.com/tikumin/ujian-kita-modul-service#readme",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^16.3.1",
+    "express": "^4.18.2",
+    "pg": "^8.11.3",
+    "pg-hstore": "^2.3.4",
+    "sequelize": "^6.33.0"
+  }
+}
