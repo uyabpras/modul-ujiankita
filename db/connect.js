@@ -8,9 +8,9 @@ const sequelize = new Sequelize(process.env.DB_NAME, process.env.DB_USER, proces
     dialect: process.env.DIALECT,
 
     pool: {
-      min: process.env.POOL_MIN, // Nilai "min" harus sesuai
-      max: process.env.POOL_MAX, // Nilai "max" sesuaikan dengan kebutuhan Anda
-      idle: process.env.IDLE, // Waktu idle sesuaikan dengan kebutuhan Anda
+      min: 0, // Nilai "min" harus sesuai
+      max: 5, // Nilai "max" sesuaikan dengan kebutuhan Anda
+      idle: 10000, // Waktu idle sesuaikan dengan kebutuhan Anda
     },
 });
 

@@ -1,6 +1,8 @@
 const { Error } = require('sequelize');
 const db = require('../db/connect');
 const modulDB = db.modul;
+//const axiosInstance = require('../helper/axiosInstance')
+const kafkaProducer = require('../config/kafka');
 
 exports.list = async(req,res) => {
     try {
@@ -69,6 +71,13 @@ exports.get = async (req, res) => {
 
 exports.add = async (req,res) =>{
     try {
+        if (req.body.token.role === 'admin' || req.body.token.role === 'guru'){
+            res.status(403).json({
+                success: false, 
+                message: 'access denied only for admins/teacher'
+            });  
+        };
+
         if(req.body.status !== "active" || req.body.status !== "deactivated" || req.body.status !== "pendings"){
             res.status(400).send({ 
                 success: false,
@@ -91,13 +100,25 @@ exports.add = async (req,res) =>{
                 message: "failed creating modul",
                 err: Error,
             });
-        }else{
-            res.status(200).send({
-                success: true,
-                data: result,
-                message: "success creating modul"
-            });
         }
+
+        const msg = {
+            userID : req.body.token.id,
+            service: 'modul',
+            typeTask: `modul ID: ${result.id}`,
+            data: {
+                modul: result._id,
+                status: result.status,
+                desc: 'create modul'
+            }
+        };
+        kafkaProducer.createTask(msg);
+
+        return res.status(200).json({
+            success: true,
+            data: result,
+            message: "success creating modul"
+        });
     } catch (err) {
         res.status(500).send({
             message: err.message || "error connect service"
@@ -107,7 +128,12 @@ exports.add = async (req,res) =>{
 
 exports.editModul = async (req, res) => {
     try {
-        
+        if (req.body.token.role === 'admin' || req.body.token.role === 'guru'){
+            res.status(403).json({
+                success: false, 
+                message: 'access denied only for admins/teachers'
+            });  
+        };
         const findID = await modulDB.findByPk(req.params.id);
 
         if (!FindID) {
@@ -149,6 +175,17 @@ exports.editModul = async (req, res) => {
             });
         }
 
+        const msg = {
+            userID: req.body.token.id,
+            service: 'modul',
+            typeTask: `modul ID: ${updateModul.id}`,
+            data:{
+                soal: updateModul.id,
+                desc: req.body.comment || 'update modul'
+            }
+        }
+        kafkaProducer.updateTask(msg);
+
         res.status(200).send({
             success: true,
             data: updatedModul,
@@ -164,6 +201,12 @@ exports.editModul = async (req, res) => {
 
 exports.delete = async(req,res)=>{
     try {
+        if (req.body.token.role === 'admin' || req.body.token.role === 'guru'){
+            res.status(403).json({
+                success: false, 
+                message: 'access denied only for admins/teachers'
+            });  
+        };
         const findID = await modulDB.findByPk(req.params.id);
       // If no results found, return document not found
       if (!findID) {
@@ -174,6 +217,18 @@ exports.delete = async(req,res)=>{
         });
     }else{
         const result = await modulDB.destroy({where: {id: req.params.id}})
+
+        const msg = {
+            userID: req.body.token.id,
+            service: 'modul',
+            typeTask: `modul ID: ${req.params.id}`,
+            data:{
+                soal: req.params.id,
+                desc: 'delete'
+            }
+        }
+        kafkaProducer.updateTask(msg);
+
         res.status(200).json({
           success: true,
           data: result,
@@ -186,3 +241,13 @@ exports.delete = async(req,res)=>{
         }); 
     }
 };
+
+exports.getHealth = async(req, res) => {
+    const data = {
+      uptime: process.uptime(),
+      message: 'Ok',
+      date: new Date()
+    }
+  
+    res.status(200).send(data);
+  }

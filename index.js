@@ -5,9 +5,10 @@ const swaggerSpec = require('./swagger');
 const swaggerUi = require('swagger-ui-express');
 const app = express();
 const modulRoute = require('./routes/routing');
+const { createTask, updateTask } = require('./config/kafka'); 
 
 app.use(express.json());
-const port = 5000;
+const port = 3011;
 
 app.use(bodyParser.json());
 app.use(cors());
@@ -27,7 +28,14 @@ db.sequelize.sync({alter: true})
 app.get('/', (req, res) => {
   res.send('Hello World!')
 })
-// require('./routes/routing')(app)
+// Jalankan produsen Kafka
+Promise.all([createTask(), updateTask()])
+  .then(() => {
+    console.log('All Kafka producers connected and sent messages.');
+  })
+  .catch((error) => {
+    console.error('Error connecting to Kafka:', error);
+  });
 
 app.listen(port, () => {
   console.log(`Example app listening on port localhost:${port}/api-docs`);

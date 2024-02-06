@@ -14,7 +14,7 @@ module.exports = (sequelize, DataTypes) =>{
             allowNull: true,
           },
           id_soal: {
-            type: DataTypes.ARRAY,
+            type: DataTypes.ARRAY(DataTypes.INTEGER),
             allowNull: false,
           },
           status: {
